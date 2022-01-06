@@ -1,0 +1,33 @@
+version: '3'
+
+volumes:
+  db-data:
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        - http_proxy=$http_proxy
+        - https_proxy=$https_proxy
+    ports:
+      - '3000:3000'
+    volumes:
+      -  '.:/product-register'
+    tty: true
+    stdin_open: true
+    environment:
+      - http_proxy=$http_proxy
+      - https_proxy=$https_proxy
+      - DATABASE_PASSWORD=$DATABASE_PASSWORD
+    depends_on:
+      - db
+    links:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    volumes:
+      - 'db-data:/var/lib/postgresql/data'
