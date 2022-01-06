@@ -8,8 +8,8 @@ services:
     build:
       context: .
       args:
-        - http_proxy=$http_proxy
-        - https_proxy=$https_proxy
+        #- http_proxy=$http_proxy
+        #- https_proxy=$https_proxy
     ports:
       - '3000:3000'
     volumes:
@@ -17,8 +17,8 @@ services:
     tty: true
     stdin_open: true
     environment:
-      - http_proxy=$http_proxy
-      - https_proxy=$https_proxy
+      #- http_proxy=$http_proxy
+      #- https_proxy=$https_proxy
       - DATABASE_PASSWORD=$DATABASE_PASSWORD
     depends_on:
       - db
@@ -29,5 +29,6 @@ services:
     image: postgres
     environment:
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - 'db-data:/var/lib/postgresql/data'

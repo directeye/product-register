@@ -1,0 +1,26 @@
+name: rails test on github actions
+on: push
+
+jobs:
+  product-registry:
+    name: product-registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: start containers
+        run: docker-compose -f "docker-compose.yml" up --build -d
+
+      - name: DB create
+        run: docker-compose exec -T --env 'RAILS_ENV=test' web rails db:create
+
+      - name: DB migrate
+        run: docker-compose exec -T --env 'RAILS_ENV=test' web rails db:migrate
+
+      - name: rails test
+        run: docker-compose exec -T --env 'RAILS_ENV=test' web rails test
+
+      - name: start containers
+        if: always()
+        run: docker-compose -f "docker-compose.yml" down
