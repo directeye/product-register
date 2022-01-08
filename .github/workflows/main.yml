@@ -1,4 +1,4 @@
-name: rails test on github actions
+name: rails test and deploy to heroku
 on: 
   push:
     branches:
@@ -6,6 +6,11 @@ on:
   pull_request:
     branches:
       - master
+
+env:
+  HEROKU_USERNAME: "_"
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+  HEROKU_APP_NAME: ${{ 'directeye-product-register' }}
 
 jobs:
   product-registry:
@@ -24,6 +29,16 @@ jobs:
           docker-compose exec -T --env 'RAILS_ENV=test' web rails db:migrate
           docker-compose exec -T --env 'RAILS_ENV=test' web rails test
 
-      - name: start containers
+      - name: stop containers
         if: always()
         run: docker-compose -f "docker-compose.yml" down
+
+      - name: Build and deploy product-register app on heroku
+        run: |
+          docker login -u "HEROKU_USERNAME" -p "HEROKU_API_KEY" registry.heroku.com
+          # heroku container:push web --app ${HEROKU_APP_NAME}
+          docker build --no-cache -t registry.heroku.com/${HEROKU_APP_NAME}/web -f Dockerfile .
+          docker push registry.heroku.com/${HEROKU_APP_NAME}/web
+          # heroku container:release web --app ${HEROKU_APP_NAME}
+          heroku run rails db:migrate --app ${HEROKU_APP_NAME}
+          # heroku run bundle exec rake db:migrate RAILS_ENV=production --app ${HEROKU_APP_NAME}
