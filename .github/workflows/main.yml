@@ -1,5 +1,11 @@
 name: rails test on github actions
-on: push
+on: 
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   product-registry:
@@ -12,14 +18,11 @@ jobs:
       - name: start containers
         run: docker-compose -f "docker-compose.yml" up --build -d
 
-      - name: DB create
-        run: docker-compose exec -T --env 'RAILS_ENV=test' web rails db:create
-
-      - name: DB migrate
-        run: docker-compose exec -T --env 'RAILS_ENV=test' web rails db:migrate
-
       - name: rails test
-        run: docker-compose exec -T --env 'RAILS_ENV=test' web rails test
+        run: | 
+          docker-compose exec -T --env 'RAILS_ENV=test' web rails db:create
+          docker-compose exec -T --env 'RAILS_ENV=test' web rails db:migrate
+          docker-compose exec -T --env 'RAILS_ENV=test' web rails test
 
       - name: start containers
         if: always()
